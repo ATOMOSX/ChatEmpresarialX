@@ -2,50 +2,47 @@ package com.example.chat.server;
 
 import com.example.chat.ChatMessage;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class ServerThread extends Thread {
-    private Socket clientSocket;
-    private ChatServer chatServer;
-    private ObjectOutputStream outputStream;
 
-    public ServerThread(Socket clientSocket, ChatServer chatServer) {
+    private ChatServer chatServer;
+    private Socket clientSocket;
+    private DataInputStream inputStream;
+    private DataOutputStream outputStream;
+
+    public ServerThread(Socket clientSocket, ChatServer chatServer) throws IOException {
         this.clientSocket = clientSocket;
         this.chatServer = chatServer;
+        inputStream = new DataInputStream(clientSocket.getInputStream());
+        outputStream = new DataOutputStream(clientSocket.getOutputStream());
     }
 
-    @Override
     public void run() {
         try {
-            outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-
             while (true) {
-                ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                ChatMessage message = (ChatMessage) in.readObject();
+                String username = inputStream.readUTF();
+                String messageText = inputStream.readUTF();
+                ChatMessage message = new ChatMessage(username, messageText, ChatMessage.Type.TEXT);
                 chatServer.broadcastMessage(message);
             }
         } catch (IOException e) {
-            System.err.println("Error handling client: " + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.err.println("Error reading message: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         } finally {
             chatServer.removeClientThread(this);
             try {
                 clientSocket.close();
             } catch (IOException e) {
-                // Do nothing
+                System.err.println("Error closing client socket: " + e.getMessage());
             }
         }
     }
 
-    public void sendMessage(ChatMessage message) {
-        try {
-            outputStream.writeObject(message);
-        } catch (IOException e) {
-            System.err.println("Error sending message: " + e.getMessage());
-        }
+    public void sendMessage(ChatMessage message) throws IOException {
+        outputStream.writeUTF(message.getMessage());
+        outputStream.flush();
     }
 }
