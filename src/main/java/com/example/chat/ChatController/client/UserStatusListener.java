@@ -1,6 +1,6 @@
-package com.example.chat.client;
+package com.example.chat.ChatController.client;
 
-import com.example.chat.user.ChatUser;
+import com.example.chat.ChatController.user.ChatUser;
 
 public interface UserStatusListener {
 

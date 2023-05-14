@@ -1,4 +1,4 @@
-package com.example.chat.client;
+package com.example.chat.ChatController.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;

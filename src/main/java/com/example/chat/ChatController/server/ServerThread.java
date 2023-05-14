@@ -1,6 +1,6 @@
-package com.example.chat.server;
+package com.example.chat.ChatController.server;
 
-import com.example.chat.ChatMessage;
+import com.example.chat.ChatController.ChatMessage;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

@@ -1,6 +1,4 @@
-package com.example.chat.user;
-
-import java.net.Socket;
+package com.example.chat.ChatController.user;
 
 public class ChatUser {
     private String name;
