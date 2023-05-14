@@ -23,8 +23,10 @@ public class ServerThread extends Thread {
 
     public void run() {
         try {
+            String username = inputStream.readUTF();
+            chatServer.broadcastMessage(new ChatMessage(username, " has joined the chat.", ChatMessage.Type.TEXT));
+
             while (true) {
-                String username = inputStream.readUTF();
                 String messageText = inputStream.readUTF();
                 ChatMessage message = new ChatMessage(username, messageText, ChatMessage.Type.TEXT);
                 chatServer.broadcastMessage(message);
@@ -42,7 +44,7 @@ public class ServerThread extends Thread {
     }
 
     public void sendMessage(ChatMessage message) throws IOException {
-        outputStream.writeUTF(message.getMessage());
+        outputStream.writeUTF(message.toString());
         outputStream.flush();
     }
 }

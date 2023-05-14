@@ -10,25 +10,30 @@ import java.util.List;
 
 public class ChatServer {
 
-    private int port;
-    private List<ServerThread> clientThreads;
+    private ServerSocket serverSocket;
+    private List<ServerThread> clientThreads = new ArrayList<>();
 
-    public ChatServer(int port) {
-        this.port = port;
-        this.clientThreads = new ArrayList<>();
-    }
-
-    public void start() throws IOException {
-        ServerSocket serverSocket = new ServerSocket(port);
+    public void start(int port) throws IOException {
+        serverSocket = new ServerSocket(port);
         System.out.println("Chat server started on port " + port);
 
         while (true) {
+            System.out.println("Waiting for clients to connect...");
             Socket clientSocket = serverSocket.accept();
-            System.out.println("New client connected: " + clientSocket.getInetAddress().getHostName());
-
+            System.out.println("Client connected from " + clientSocket.getInetAddress());
             ServerThread clientThread = new ServerThread(clientSocket, this);
             clientThreads.add(clientThread);
             clientThread.start();
+        }
+    }
+
+    public void broadcastMessage(ChatMessage message) {
+        for (ServerThread clientThread : clientThreads) {
+            try {
+                clientThread.sendMessage(message);
+            } catch (IOException e) {
+                System.err.println("Error broadcasting message to client: " + e.getMessage());
+            }
         }
     }
 
@@ -36,9 +41,12 @@ public class ChatServer {
         clientThreads.remove(clientThread);
     }
 
-    public void broadcastMessage(ChatMessage message) {
-        for (ServerThread clientThread : clientThreads) {
-            clientThread.sendMessage(message);
+    public static void main(String[] args) {
+        ChatServer chatServer = new ChatServer();
+        try {
+            chatServer.start(5000);
+        } catch (IOException e) {
+            System.err.println("Error starting chat server: " + e.getMessage());
         }
     }
 }
